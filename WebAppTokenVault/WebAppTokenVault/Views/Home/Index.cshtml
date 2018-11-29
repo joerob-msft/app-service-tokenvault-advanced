@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div>
+    <a href="@ViewBag.LoginLink">Login</a>
+    <div>@ViewBag.Secret</div>
+
+    <div>@ViewBag.Principal</div>
+
+    @foreach (string file in ViewBag.FileList)
+    {
+        @Html.Raw(file)
+        <br />
+    }
+
+    <div>@ViewBag.Error</div>
+
+</div>
