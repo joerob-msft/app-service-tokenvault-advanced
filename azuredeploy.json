@@ -131,7 +131,7 @@
                     "type": "config",
                     "location": "[parameters('webAppLocation')]",
                     "properties": {
-                        "tokenResourceUrl": "[reference(concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName'), '/services/dropbox/tokens/sampleToken'), '2018-08-01-preview').tokenUri]"
+                        "tokenResourceUrl": "[reference(concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName')), '2018-08-01-preview').vaultUrl]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/Sites', parameters('webSiteName'))]",

@@ -23,9 +23,10 @@ namespace WebAppTokenVault.Controllers
         {
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-            // token Url - e.g. "https://tokenvaultname.westcentralus.tokenvault.azure.net/services/dropbox/tokens/sampleToken"
-            string tokenResourceUrl = ConfigurationManager.AppSettings["tokenResourceUrl"];
-            ViewBag.LoginLink = $"{tokenResourceUrl}/login?PostLoginRedirectUrl={this.Request.Url}";
+            var vaultUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+            var tokenResourceUrl = $"{vaultUrl}/services/dropbox/tokens/sampleToken";
+
+            ViewBag.LoginLink = $"{tokenResourceUrl}/login?PostLoginRedirectUrl={this.Request.Url}/vault/appservicedemo5/dropbox/sampletoken/save?vaultUrl={vaultUrl}";
 
             try
             {
@@ -44,6 +45,7 @@ namespace WebAppTokenVault.Controllers
             }
             catch (Exception exp)
             {
+                ViewBag.FileList = new List<string>();
                 ViewBag.Error = $"Something went wrong: {exp.InnerException?.Message}";
             }
 
@@ -70,19 +72,22 @@ namespace WebAppTokenVault.Controllers
         {
             var filesList = new List<string>();
 
-            using (var dbx = new DropboxClient(token))
+            if (!string.IsNullOrEmpty(token))
             {
-                var list = await dbx.Files.ListFolderAsync(string.Empty);
-
-                // show folders then files
-                foreach (var item in list.Entries.Where(i => i.IsFolder))
+                using (var dbx = new DropboxClient(token))
                 {
-                    filesList.Add($"D  {item.Name}/");
-                }
+                    var list = await dbx.Files.ListFolderAsync(string.Empty);
 
-                foreach (var item in list.Entries.Where(i => i.IsFile))
-                {
-                    filesList.Add($"F  {item.Name}");
+                    // show folders then files
+                    foreach (var item in list.Entries.Where(i => i.IsFolder))
+                    {
+                        filesList.Add($"D  {item.Name}/");
+                    }
+
+                    foreach (var item in list.Entries.Where(i => i.IsFile))
+                    {
+                        filesList.Add($"F  {item.Name}");
+                    }
                 }
             }
 
