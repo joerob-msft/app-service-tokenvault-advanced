@@ -10,6 +10,8 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using Microsoft.Azure.Services.AppAuthentication;
 using System.Net.Http.Headers;
+using System.Net;
+using System.Configuration;
 
 namespace WebAppTokenVault.Controllers
 {
@@ -20,14 +22,24 @@ namespace WebAppTokenVault.Controllers
         // static client to have connection pooling
         private static HttpClient _httpClient = new HttpClient();
 
-        public VaultController()
+        [HttpGet]
+        [Route("{vaultName}/{serviceName}/{tokenName}/login")]
+        public ActionResult LoginAsync(string vaultName, string serviceName, string tokenName, string PostLoginRedirectUrl)
         {
+            var vaultUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+            return Redirect($"{vaultUrl}/services/{serviceName}/tokens/{tokenName}/login?PostLoginRedirectUrl={PostLoginRedirectUrl}");
         }
 
         [HttpGet]
         [Route("{vaultName}/{serviceName}/{tokenName}/save")]
         public async Task<ActionResult> SaveTokenAsync(string vaultName, string serviceName, string tokenName, string vaultUrl, string code)
         {
+            if (Session.SessionID != tokenName)
+            {
+                throw new InvalidOperationException($"Failed to commit token.");
+                // This indicates the save call is coming from a different session then the login page was linked from and should not be allowed.
+            }
+
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
             string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVaultResource);

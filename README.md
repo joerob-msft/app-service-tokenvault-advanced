@@ -61,7 +61,6 @@ public async System.Threading.Tasks.Task<ActionResult> Index()
     {
         var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-        // token Url - e.g. "https://tokenvaultname.westcentralus.tokenvault.azure.net/services/dropbox/tokens/sampleToken"
         string tokenResourceUrl = ConfigurationManager.AppSettings["tokenResourceUrl"];
         ViewBag.LoginLink = $"{tokenResourceUrl}/login?PostLoginRedirectUrl={this.Request.Url}";
 
