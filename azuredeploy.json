@@ -160,7 +160,9 @@
             "apiVersion": "2018-08-01-preview",
             "location": "[parameters('tokenVaultLocation')]",
             "tags": {},
-            "properties": {},
+            "properties": {
+                "authorizedPostRedirectUrls": "[concat('https://', parameters('webSiteName'), '.azurewebsites.net/')]"
+            },
             "dependsOn": [
                 "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
             ],

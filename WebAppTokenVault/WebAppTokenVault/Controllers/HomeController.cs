@@ -33,7 +33,7 @@ namespace WebAppTokenVault.Controllers
 
             var tokenResourceUrl = $"{vaultUrl}/services/dropbox/tokens/{sessionTokenName}";
 
-            ViewBag.LoginLink = $"{this.Request.Url}/vault/{vaultName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}/vault/{vaultName}/dropbox/{sessionTokenName}/save?vaultUrl={vaultUrl}";
+            ViewBag.LoginLink = $"{this.Request.Url}vault/{vaultName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}vault/{vaultName}/dropbox/{sessionTokenName}/save?vaultUrl={vaultUrl}";
 
             try
             {
