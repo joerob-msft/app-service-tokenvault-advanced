@@ -81,7 +81,7 @@
         },
         "githubUrl": {
             "type": "string",
-            "defaultValue": "https://github.com/joerob-msft/app-service-msi-tokenvault-dotnet.git"
+            "defaultValue": "https://github.com/joerob-msft/app-service-tokenvault-advanced.git"
         },
         "githubBranch": {
             "type": "string",
