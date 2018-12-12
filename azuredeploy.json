@@ -161,7 +161,7 @@
             "location": "[parameters('tokenVaultLocation')]",
             "tags": {},
             "properties": {
-                "authorizedPostRedirectUrls": "[concat('https://', parameters('webSiteName'), '.azurewebsites.net/')]"
+                "authorizedPostRedirectUrls": ["[concat('https://', parameters('webSiteName'), '.azurewebsites.net/')]"]
             },
             "dependsOn": [
                 "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
