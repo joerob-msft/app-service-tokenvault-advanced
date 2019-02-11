@@ -37,14 +37,16 @@ namespace WebAppTokenVault.Controllers
 
             try
             {
-                string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVaultResource);
-                await CreateTokenIfNotExists(sessionTokenName, tokenResourceUrl, apiToken);
+                // Get a token to access Token Vault
+                string tokenVaultApiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVaultResource);
+                await CreateTokenResourceIfNotExists(sessionTokenName, tokenResourceUrl, tokenVaultApiToken);
 
-                var token = await GetAccessToken(tokenResourceUrl, apiToken);
+                // Get Dropbox token from Token Vault
+                var dropboxApiToken = await GetAccessToken(tokenResourceUrl, tokenVaultApiToken);
 
-                ViewBag.Secret = $"Token: {token.Value?.AccessToken}";
+                ViewBag.Secret = $"Token: {dropboxApiToken.Value?.AccessToken}";
 
-                ViewBag.FileList = await this.GetDocuments(token.Value?.AccessToken);
+                ViewBag.FileList = await this.GetDocuments(dropboxApiToken.Value?.AccessToken);
             }
             catch (Exception exp)
             {
@@ -57,10 +59,10 @@ namespace WebAppTokenVault.Controllers
             return View();
         }
 
-        private static async Task<Token> GetAccessToken(string tokenResourceUrl, string apiToken)
+        private static async Task<Token> GetAccessToken(string tokenResourceUrl, string tokenVaultApiToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, tokenResourceUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenVaultApiToken);
 
             var response = await client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -69,7 +71,7 @@ namespace WebAppTokenVault.Controllers
             return token;
         }
 
-        private static async Task CreateTokenIfNotExists(string sessionTokenName, string tokenResourceUrl, string apiToken)
+        private static async Task CreateTokenResourceIfNotExists(string sessionTokenName, string tokenResourceUrl, string tokenVaultApiToken)
         {
             // PUT on token is required before POST
             var putRequest = new HttpRequestMessage(HttpMethod.Put, tokenResourceUrl)
@@ -77,7 +79,7 @@ namespace WebAppTokenVault.Controllers
                 Content = new StringContent($"{{ 'name' : '{sessionTokenName}' }}", Encoding.UTF8, "application/json"),
             };
 
-            putRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+            putRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenVaultApiToken);
 
             var putResponse = await client.SendAsync(putRequest);
             var putResponseString = await putResponse.Content.ReadAsStringAsync();
