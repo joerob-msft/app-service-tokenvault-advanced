@@ -9,14 +9,14 @@ using System.Net.Http.Headers;
 using Microsoft.Azure.Services.AppAuthentication;
 using Dropbox.Api;
 using Newtonsoft.Json;
-using WebAppTokenVault.Models;
+using WebAppTokenStore.Models;
 using System.Text;
 
-namespace WebAppTokenVault.Controllers
+namespace WebAppTokenStore.Controllers
 {
     public class HomeController : Controller
     {
-        const string TokenVaultResource = "https://tokenvault.azure.net";
+        const string TokenStoreResource = "https://tokenstore.azure.net";
         // static client to have connection pooling
         private static HttpClient client = new HttpClient();
 
@@ -28,21 +28,21 @@ namespace WebAppTokenVault.Controllers
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-            var vaultUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
-            var vaultName = $"{ConfigurationManager.AppSettings["vaultName"]}";
+            var storeUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+            var storeName = $"{ConfigurationManager.AppSettings["storeName"]}";
 
-            var tokenResourceUrl = $"{vaultUrl}/services/dropbox/tokens/{sessionTokenName}";
+            var tokenResourceUrl = $"{storeUrl}/services/dropbox/tokens/{sessionTokenName}";
 
-            ViewBag.LoginLink = $"{this.Request.Url}vault/{vaultName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}vault/{vaultName}/dropbox/{sessionTokenName}/save?vaultUrl={vaultUrl}";
+            ViewBag.LoginLink = $"{this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/save?storeUrl={storeUrl}";
 
             try
             {
-                // Get a token to access Token Vault
-                string tokenVaultApiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVaultResource);
-                await CreateTokenResourceIfNotExists(sessionTokenName, tokenResourceUrl, tokenVaultApiToken);
+                // Get a token to access Token Store
+                string tokenStoreApiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenStoreResource);
+                await CreateTokenResourceIfNotExists(sessionTokenName, tokenResourceUrl, tokenStoreApiToken);
 
-                // Get Dropbox token from Token Vault
-                var dropboxApiToken = await GetAccessToken(tokenResourceUrl, tokenVaultApiToken);
+                // Get Dropbox token from Token Store
+                var dropboxApiToken = await GetAccessToken(tokenResourceUrl, tokenStoreApiToken);
 
                 ViewBag.Secret = $"Token: {dropboxApiToken.Value?.AccessToken}";
 
@@ -59,10 +59,10 @@ namespace WebAppTokenVault.Controllers
             return View();
         }
 
-        private static async Task<Token> GetAccessToken(string tokenResourceUrl, string tokenVaultApiToken)
+        private static async Task<Token> GetAccessToken(string tokenResourceUrl, string tokenStoreApiToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, tokenResourceUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenVaultApiToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenStoreApiToken);
 
             var response = await client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -71,7 +71,7 @@ namespace WebAppTokenVault.Controllers
             return token;
         }
 
-        private static async Task CreateTokenResourceIfNotExists(string sessionTokenName, string tokenResourceUrl, string tokenVaultApiToken)
+        private static async Task CreateTokenResourceIfNotExists(string sessionTokenName, string tokenResourceUrl, string tokenStoreApiToken)
         {
             // PUT on token is required before POST
             var putRequest = new HttpRequestMessage(HttpMethod.Put, tokenResourceUrl)
@@ -79,7 +79,7 @@ namespace WebAppTokenVault.Controllers
                 Content = new StringContent($"{{ 'name' : '{sessionTokenName}' }}", Encoding.UTF8, "application/json"),
             };
 
-            putRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenVaultApiToken);
+            putRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenStoreApiToken);
 
             var putResponse = await client.SendAsync(putRequest);
             var putResponseString = await putResponse.Content.ReadAsStringAsync();

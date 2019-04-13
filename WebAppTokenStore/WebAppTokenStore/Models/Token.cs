@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace WebAppTokenVault.Models
+namespace WebAppTokenStore.Models
 {
     public class Token
     {
