@@ -13,26 +13,26 @@ using System.Net.Http.Headers;
 using System.Net;
 using System.Configuration;
 
-namespace WebAppTokenVault.Controllers
+namespace WebAppTokenStore.Controllers
 {
     [RoutePrefix("vault")]
     public class VaultController : Controller
     {
-        const string TokenVaultResource = "https://tokenvault.azure.net";
+        const string TokenStoreResource = "https://tokenstore.azure.net";
         // static client to have connection pooling
         private static HttpClient _httpClient = new HttpClient();
 
         [HttpGet]
-        [Route("{vaultName}/{serviceName}/{tokenName}/login")]
-        public ActionResult LoginAsync(string vaultName, string serviceName, string tokenName, string PostLoginRedirectUrl)
+        [Route("{storeName}/{serviceName}/{tokenName}/login")]
+        public ActionResult LoginAsync(string storeName, string serviceName, string tokenName, string PostLoginRedirectUrl)
         {
             var vaultUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
             return Redirect($"{vaultUrl}/services/{serviceName}/tokens/{tokenName}/login?PostLoginRedirectUrl={PostLoginRedirectUrl}");
         }
 
         [HttpGet]
-        [Route("{vaultName}/{serviceName}/{tokenName}/save")]
-        public async Task<ActionResult> SaveTokenAsync(string vaultName, string serviceName, string tokenName, string vaultUrl, string code)
+        [Route("{storeName}/{serviceName}/{tokenName}/save")]
+        public async Task<ActionResult> SaveTokenAsync(string storeName, string serviceName, string tokenName, string storeUrl, string code)
         {
             if (Session.SessionID != tokenName)
             {
@@ -42,9 +42,9 @@ namespace WebAppTokenVault.Controllers
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVaultResource);
+            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenStoreResource);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{vaultUrl}/services/{serviceName}/tokens/{tokenName}/save");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{storeUrl}/services/{serviceName}/tokens/{tokenName}/save");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
             request.Content = new StringContent(new JObject
                     {

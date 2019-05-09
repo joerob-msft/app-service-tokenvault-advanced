@@ -15,7 +15,7 @@
             "metadata": {
                 "description": "Name of the Web Hosting Plan."
             },
-            "defaultValue": "VaultWebAppPlan"
+            "defaultValue": "StoreWebAppPlan"
         },
         "skuName": {
             "type": "string",
@@ -51,17 +51,17 @@
                 "East US 2" 
             ]
         },
-        "tokenVaultName": {
+        "tokenStoreName": {
             "type": "string",
             "metadata": {
-                "description": "Token Vault to be created. Web site will be granted access to this Token Vault. Token Vault DNS name should be whitelisted in SAAS OAuth app registration as valid redirect - see value in ARM output TokenVaultRedirectUri."
+                "description": "Token Store to be created. Web site will be granted access to this Token Store. Token Store DNS name should be whitelisted in SAAS OAuth app registration as valid redirect - see value in ARM output TokenStoreRedirectUri."
             }
         },
-        "tokenVaultLocation": {
+        "tokenStoreLocation": {
             "type": "string",
             "defaultValue": "West Central US",
             "metadata": {
-                "description": "Azure location where the token vault will be deployed."
+                "description": "Azure location where the token store will be deployed."
             },
             "allowedValues": [
                 "West Central US" 
@@ -70,13 +70,13 @@
         "dropboxAppKey": {
             "type": "string",
             "metadata": {
-                "description": "App Key to add to the Token Vault Service. Obtain it by creating a new app at https://www.dropbox.com/developers/apps."
+                "description": "App Key to add to the Token Store Service. Obtain it by creating a new app at https://www.dropbox.com/developers/apps."
             }
         },
         "DropboxAppSecret": {
             "type": "securestring",
             "metadata": {
-                "description": "App Secret to add to the Token Vault Service. Obtain it by creating a new app at https://www.dropbox.com/developers/apps"
+                "description": "App Secret to add to the Token Store Service. Obtain it by creating a new app at https://www.dropbox.com/developers/apps"
             }
         },
         "githubUrl": {
@@ -131,8 +131,8 @@
                     "type": "config",
                     "location": "[parameters('webAppLocation')]",
                     "properties": {
-                        "tokenResourceUrl": "[reference(concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName')), '2018-08-01-preview').vaultUrl]",
-                        "vaultName": "[parameters('tokenVaultName')]"
+                        "tokenResourceUrl": "[reference(concat('Microsoft.Token/stores/', parameters('tokenStoreName')), '2018-08-01-preview').storeUrl]",
+                        "storeName": "[parameters('tokenStoreName')]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/Sites', parameters('webSiteName'))]",
@@ -155,10 +155,10 @@
             ]
         },
         {
-            "type": "Microsoft.TokenVault/vaults",
-            "name": "[parameters('tokenVaultName')]",
+            "type": "Microsoft.Token/stores",
+            "name": "[parameters('tokenStoreName')]",
             "apiVersion": "2018-08-01-preview",
-            "location": "[parameters('tokenVaultLocation')]",
+            "location": "[parameters('tokenStoreLocation')]",
             "tags": {},
             "properties": {
                 "authorizedPostRedirectUrls": ["[concat('https://', parameters('webSiteName'), '.azurewebsites.net/')]","http://localhost:10329/"]
@@ -184,7 +184,7 @@
                         ]
                     },
                     "dependsOn": [
-                        "[concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName'))]"
+                        "[concat('Microsoft.Token/stores/', parameters('tokenStoreName'))]"
                     ]
                 },
                 {
@@ -205,7 +205,7 @@
                         "displayName": "App Demo Dropbox App"
                     },
                     "dependsOn": [
-                        "[concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName'))]"
+                        "[concat('Microsoft.Token/stores/', parameters('tokenStoreName'))]"
                     ]                    
                 }
             ]
@@ -214,7 +214,7 @@
     "outputs": {
         "TokenVaultRedirectUri": {
             "type": "string", 
-            "value": "[reference(concat('Microsoft.TokenVault/vaults/', parameters('tokenVaultName')), '2018-08-01-preview').redirectUrl]", 
+            "value": "[reference(concat('Microsoft.Token/stores/', parameters('tokenStoreName')), '2018-08-01-preview').redirectUrl]", 
             "metadata":{
                 "description": "This url must be whitelisted as valid redirect Url in the SAAS registration - e.g. https://www.dropbox.com/developers/apps."
             }
