@@ -15,7 +15,7 @@ using System.Configuration;
 
 namespace WebAppTokenStore.Controllers
 {
-    [RoutePrefix("vault")]
+    [RoutePrefix("store")]
     public class VaultController : Controller
     {
         const string TokenStoreResource = "https://tokenstore.azure.net";
