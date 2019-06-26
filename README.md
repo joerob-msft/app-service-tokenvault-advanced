@@ -61,12 +61,16 @@ public async System.Threading.Tasks.Task<ActionResult> Index()
     {
         var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-        string tokenResourceUrl = ConfigurationManager.AppSettings["tokenResourceUrl"];
-        ViewBag.LoginLink = $"{tokenResourceUrl}/login?PostLoginRedirectUrl={this.Request.Url}";
+        var storeUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+        var storeName = $"{ConfigurationManager.AppSettings["storeName"]}";
+
+        var tokenResourceUrl = $"{storeUrl}/services/dropbox/tokens/{sessionTokenName}";
+
+        ViewBag.LoginLink = $"{this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/save?storeUrl={storeUrl}";
 
         try
         {
-            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVStoreResource);
+            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(storeUrl);
             var request = new HttpRequestMessage(HttpMethod.Post, tokenResourceUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
 
