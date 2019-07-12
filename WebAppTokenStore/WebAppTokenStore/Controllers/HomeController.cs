@@ -28,6 +28,7 @@ namespace WebAppTokenStore.Controllers
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
             var storeUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+            storeUrl = storeUrl.EndsWith("/") ? storeUrl.TrimEnd('/') : storeUrl;
             var storeName = $"{ConfigurationManager.AppSettings["storeName"]}";
 
             var tokenResourceUrl = $"{storeUrl}/services/dropbox/tokens/{sessionTokenName}";
