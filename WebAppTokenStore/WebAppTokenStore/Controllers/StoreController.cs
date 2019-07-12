@@ -42,7 +42,7 @@ namespace WebAppTokenStore.Controllers
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenStoreResource);
+            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(storeUrl);
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"{storeUrl}/services/{serviceName}/tokens/{tokenName}/save");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
