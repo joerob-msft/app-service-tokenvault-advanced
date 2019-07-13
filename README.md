@@ -23,7 +23,7 @@ To run and deploy this sample, you need the following:
 Log in to <a href="https://www.dropbox.com/developers/apps/create" target="_blank">Dropbox</a> and create an API App that this sample App Service integrates with.
 
 1. Note the **App Key** and **App Secret** from the App Settings page.
-2. Add a redirect URI that matches the Token Store that will be created in step 2. (https://tokenvaultname.westcentralus.tokenvault.azure.net) where <tokenvaultname> matches the name specified when deploying below.
+2. Add a redirect URI that matches the Token Store that will be created in step 2. (https://tokenvaultname.tokenvault.azure.net) where <tokenvaultname> matches the name specified when deploying below.
 
 ## Step 2: Create an App Service with a Managed Service Identity (MSI)
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjoerob-msft%2Fapp-service-tokenvault-advanced%2Fmaster%2Fazuredeploy.json" target="_blank">
@@ -61,12 +61,16 @@ public async System.Threading.Tasks.Task<ActionResult> Index()
     {
         var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
-        string tokenResourceUrl = ConfigurationManager.AppSettings["tokenResourceUrl"];
-        ViewBag.LoginLink = $"{tokenResourceUrl}/login?PostLoginRedirectUrl={this.Request.Url}";
+        var storeUrl = $"{ConfigurationManager.AppSettings["tokenResourceUrl"]}";
+        var storeName = $"{ConfigurationManager.AppSettings["storeName"]}";
+
+        var tokenResourceUrl = $"{storeUrl}/services/dropbox/tokens/{sessionTokenName}";
+
+        ViewBag.LoginLink = $"{this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/login?PostLoginRedirectUrl={this.Request.Url}store/{storeName}/dropbox/{sessionTokenName}/save?storeUrl={storeUrl}";
 
         try
         {
-            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(TokenVStoreResource);
+            string apiToken = await azureServiceTokenProvider.GetAccessTokenAsync(storeUrl);
             var request = new HttpRequestMessage(HttpMethod.Post, tokenResourceUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
 
@@ -93,7 +97,7 @@ public async System.Threading.Tasks.Task<ActionResult> Index()
 In the Web.config file, change the tokenstorename in the key tokenResourceUrl to the one you just created. Replace **TokenStoreName** with the name of your Token Store. 
 
 ```xml   
-<add key="tokenResourceUrl" value="https://tokenvaultname.westcentralus.tokenvault.azure.net/services/dropbox/tokens/sampleToken" />
+<add key="tokenResourceUrl" value="https://tokenvaultname.tokenvault.azure.net/services/dropbox/tokens/sampleToken" />
 ```
 ## Step 5: Run the application on your local development machine
 AzureServiceTokenProvider will use the developer's security context to get a token to authenticate to Token Store. This removes the need to create a service principal, and share it with the development team. It also prevents credentials from being checked in to source code. 
